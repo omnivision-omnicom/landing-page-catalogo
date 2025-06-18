@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Canal 29 Omnivisión - Medio líder en Chalatenango</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#315281',
+                            600: '#2a4670',
+                            700: '#233a5f'
+                        },
+                        secondary: '#0fd2fa',
+                        accent: '#a0c3df',
+                        background: '#f0f3f6',
+                        light: '#c3dff2',
+                        dark: '#1A1A1A',
+                        gray1: '#806e73',
+                        gray2: '#817e72',
+                        gray3: '#b5a9c2'
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                        heading: ['Montserrat', 'sans-serif']
+                    },
+                    boxShadow: {
+                        'card': '0 10px 30px rgba(0, 0, 0, 0.08)',
+                        'card-hover': '0 15px 40px rgba(49, 82, 129, 0.2)',
+                        'glow': '0 0 20px rgba(15, 210, 250, 0.3)'
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-15px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .delay-100 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-200 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-300 {
+            animation-delay: 0.3s;
+        }
+
+        .delay-400 {
+            animation-delay: 0.4s;
+        }
+
+        .hero-bg {
+            background: linear-gradient(112deg, rgba(49, 82, 129, 0.9) 0%, rgba(49, 82, 129, 0.8) 100%),
+                url('https://images.unsplash.com/photo-1574717024453-354056aafa98?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .testimonial-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            background: linear-gradient(to bottom, #ffffff, #f0f3f6);
+        }
+
+        .testimonial-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .testimonial-card::before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: 20px;
+            font-size: 6rem;
+            color: #a0c3df;
+            opacity: 0.2;
+            font-family: Georgia, serif;
+            line-height: 1;
+            z-index: 0;
+        }
+
+        .service-card {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-top: 4px solid #0fd2fa;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(to bottom, #FFFFFF, #f0f3f6);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .service-card.popular {
+            border: 2px solid #0fd2fa;
+            box-shadow: 0 0 30px rgba(15, 210, 250, 0.2);
+        }
+
+        .service-card.popular::before {
+            content: "MÁS POPULAR";
+            position: absolute;
+            top: 15px;
+            right: -30px;
+            background: #0fd2fa;
+            color: white;
+            padding: 5px 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            transform: rotate(45deg);
+            z-index: 10;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 16px;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 5px;
+        }
+
+        .leaflet-popup-content {
+            margin: 12px;
+            font-size: 14px;
+            min-width: 250px;
+        }
+
+        .leaflet-popup-content h3 {
+            margin: 0 0 8px 0;
+            color: #315281;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .leaflet-popup-content ul {
+            padding-left: 18px;
+            margin: 8px 0;
+        }
+
+        .leaflet-popup-content li {
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .pulse-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #0fd2fa;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 4px rgba(15, 210, 250, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(15, 210, 250, 0.4);
+            }
+
+            70% {
+                box-shadow: 0 0 0 12px rgba(15, 210, 250, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(15, 210, 250, 0);
+            }
+        }
+
+        .legend {
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .legend-color {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .highlighted {
+            animation: highlight 1.5s ease-in-out infinite;
+        }
+
+        @keyframes highlight {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .highlight-text {
+            position: relative;
+            display: inline-block;
+            z-index: 1;
+        }
+
+        .highlight-text::after {
+            content: "";
+            position: absolute;
+            bottom: 5px;
+            left: 0;
+            width: 100%;
+            height: 12px;
+            background: rgba(15, 210, 250, 0.3);
+            z-index: -1;
+            transform: skewX(-15deg);
+        }
+
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .contact-form input,
+        .contact-form textarea,
+        .contact-form select {
+            transition: all 0.3s ease;
+            border: 1px solid #c3dff2;
+        }
+
+        .contact-form input:focus,
+        .contact-form textarea:focus,
+        .contact-form select:focus {
+            border-color: #0fd2fa;
+            box-shadow: 0 0 0 3px rgba(15, 210, 250, 0.1);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo-number {
+            background: #315281;
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            position: relative;
+        }
+
+        .logo-number::after {
+            content: "";
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 10px;
+            height: 10px;
+            background: #0fd2fa;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .catalog-section {
+            background: linear-gradient(135deg, #315281 0%, #2a4670 100%);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .catalog-content {
+            background: url('https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80') center/cover;
+            position: relative;
+        }
+
+        .catalog-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, rgba(49, 82, 129, 0.9) 0%, rgba(49, 82, 129, 0.7) 100%);
+        }
+
+        .leaflet-popup {
+            z-index: 1000 !important;
+        }
+
+        .map-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .map-style-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 15px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .map-style-btn:hover {
+            background: #0fd2fa;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .priority-marker {
+            position: relative;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            animation: pulse 2s infinite;
+        }
+
+        .priority-1 {
+            width: 30px;
+            height: 30px;
+            background: #315281;
+            border: 3px solid white;
+            z-index: 1000;
+        }
+
+        .priority-2 {
+            width: 25px;
+            height: 25px;
+            background: #4a6da0;
+            border: 2px solid white;
+        }
+
+        .priority-3 {
+            width: 22px;
+            height: 22px;
+            background: #5d87b8;
+            border: 2px solid white;
+        }
+
+        .priority-4 {
+            width: 20px;
+            height: 20px;
+            background: #7fa1d0;
+            border: 2px solid white;
+        }
+
+        .priority-5 {
+            width: 18px;
+            height: 18px;
+            background: #a0c3df;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+
+<body class="font-sans bg-background text-gray-800">
+    <!-- Header -->
+    <header class="fixed w-full z-50 bg-white/95 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="#" class="logo group">
+                <div class="logo-number transform group-hover:rotate-12 transition-transform">
+                    29
+                </div>
+                <div>
+                    <div class="text-xl font-bold text-primary">CANAL 29</div>
+                    <div class="text-sm font-bold text-gray-500">OMNIVISIÓN</div>
+                </div>
+            </a>
+            <nav class="hidden md:block">
+                <ul class="flex space-x-8">
+                    <li><a href="#about" class="text-primary hover:text-secondary font-medium transition-colors">Quiénes
+                            Somos</a></li>
+                    <li><a href="#coverage"
+                            class="text-primary hover:text-secondary font-medium transition-colors">Cobertura</a></li>
+                    <li><a href="#services"
+                            class="text-primary hover:text-secondary font-medium transition-colors">Publicidad</a></li>
+                    <li><a href="#catalog"
+                            class="text-primary hover:text-secondary font-medium transition-colors">Catálogo</a></li>
+                    <li><a href="#testimonials"
+                            class="text-primary hover:text-secondary font-medium transition-colors">Testimonios</a></li>
+                    <li><a href="#contact"
+                            class="bg-secondary hover:bg-primary text-white font-medium py-2 px-5 rounded-full transition-colors shadow-lg shadow-secondary/30">Contacto</a>
+                    </li>
+                </ul>
+            </nav>
+            <button class="md:hidden text-primary">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-bg min-h-screen flex items-center pt-16">
+        <div class="container mx-auto px-4 py-20">
+            <div class="max-w-2xl">
+                <div
+                    class="inline-block bg-secondary/20 text-white font-semibold py-1 px-4 rounded-full mb-6 animate-fade-in">
+                    <span class="mr-2">•</span> 24 años de trayectoria
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold text-white mb-6 leading-tight">
+                    Somos más que TV.<br>
+                    <span class="text-secondary highlight-text">Somos tu voz local.</span>
+                </h1>
+                <p class="text-xl text-white/90 mb-10 max-w-2xl">Llegamos a miles de hogares en Chalatenango con
+                    programación diversa, noticias locales y oportunidades de crecimiento para tu negocio.</p>
+                <div class="flex flex-wrap gap-4">
+                    <a href="#services"
+                        class="bg-secondary hover:bg-primary text-white font-bold py-4 px-8 rounded-full transition-colors flex items-center group shadow-lg shadow-secondary/30 hover:shadow-secondary/40">
+                        <span>Promociona tu negocio</span>
+                        <i class="fas fa-arrow-right ml-3 transform group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                    <a href="#about"
+                        class="bg-white hover:bg-light text-primary font-bold py-4 px-8 rounded-full transition-colors shadow-lg">
+                        Conoce nuestra historia
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Elemento flotante -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <a href="#about" class="text-white text-2xl">
+                <i class="fas fa-chevron-down"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-12 bg-gradient-to-r from-primary to-primary-600 text-white">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div class="stats-item animate-fade-in">
+                    <p class="text-4xl font-bold">24+</p>
+                    <p class="text-sm opacity-80">Años de experiencia</p>
+                </div>
+                <div class="stats-item animate-fade-in delay-100">
+                    <p class="text-4xl font-bold">15+</p>
+                    <p class="text-sm opacity-80">Municipios cubiertos</p>
+                </div>
+                <div class="stats-item animate-fade-in delay-200">
+                    <p class="text-4xl font-bold">290K+</p>
+                    <p class="text-sm opacity-80">Seguidores totales</p>
+                </div>
+                <div class="stats-item animate-fade-in delay-300">
+                    <p class="text-4xl font-bold">24/7</p>
+                    <p class="text-sm opacity-80">Transmisión continua</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row items-center gap-12">
+                <div class="lg:w-1/2">
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen></iframe>
+                    </div>
+                </div>
+                <div class="lg:w-1/2">
+                    <h2 class="text-3xl md:text-4xl font-bold text-primary mb-6">Tu <span class="text-secondary">medio
+                            de confianza</span> en Chalatenango</h2>
+                    <p class="text-lg mb-6">Desde 1999, <span class="font-bold text-primary">Canal 29 Omnivisión</span>
+                        ha sido el corazón informativo y de entretenimiento de Chalatenango. Nuestro compromiso es
+                        conectar a la comunidad, promover el comercio local y ser la voz de nuestra región.</p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                        <div class="flex items-start bg-light p-4 rounded-xl">
+                            <div class="bg-secondary/10 text-secondary p-3 rounded-lg mr-4">
+                                <i class="fas fa-satellite-dish text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-1">Cobertura regional</h3>
+                                <p class="text-gray-600">Llegamos a más de 15 municipios del departamento</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-light p-4 rounded-xl">
+                            <div class="bg-secondary/10 text-secondary p-3 rounded-lg mr-4">
+                                <i class="fas fa-users text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-1">Para todas las edades</h3>
+                                <p class="text-gray-600">Programación diversa que une a la familia</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-light p-4 rounded-xl">
+                            <div class="bg-secondary/10 text-secondary p-3 rounded-lg mr-4">
+                                <i class="fas fa-bullhorn text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-1">Impacto publicitario</h3>
+                                <p class="text-gray-600">Soluciones efectivas para negocios locales</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start bg-light p-4 rounded-xl">
+                            <div class="bg-secondary/10 text-secondary p-3 rounded-lg mr-4">
+                                <i class="fas fa-microphone-alt text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-lg mb-1">Voz de la comunidad</h3>
+                                <p class="text-gray-600">Noticias locales relevantes y actualizadas</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a href="#contact" class="inline-flex items-center text-primary font-semibold group">
+                        <span class="mr-2">Comienza a anunciarte hoy</span>
+                        <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coverage Section (Mapa Leaflet) -->
+    <section id="coverage" class="py-20 bg-background">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">Llegamos a <span
+                        class="text-secondary">toda Chalatenango</span></h2>
+                <p class="text-lg text-gray-600">Nuestra señal cubre los principales municipios del departamento y zonas
+                    aledañas</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div id="map"></div>
+                <div class="map-controls">
+                    <button class="map-style-btn" onclick="changeMapStyle('light')">Estilo Simple</button>
+                    <button class="map-style-btn" onclick="changeMapStyle('gray')">Escala de Grises</button>
+                    <button class="map-style-btn" onclick="changeMapStyle('dark')">Modo Oscuro</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-primary mb-6">Municipios con cobertura completa</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Chalatenango (centro)</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Agua Caliente</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Arcatao</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Azacualpa</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Citalá</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Comalapa</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>Concepción Quezaltepeque</span>
+                        </div>
+                        <div class="flex items-center bg-light p-4 rounded-lg">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-location-dot"></i>
+                            </div>
+                            <span>El Carrizal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h3 class="text-2xl font-bold text-primary mb-6">Otras zonas de cobertura</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Santa Ana</h4>
+                                <p>Caseríos de Metapán</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Cuscatlán</h4>
+                                <p>Caseríos de Suchitoto</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">San Salvador</h4>
+                                <p>Aguilares</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <div class="bg-secondary/10 text-secondary p-2 rounded mr-3">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">La Libertad</h4>
+                                <p>San Pablo Tacachico</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 p-6 bg-secondary/5 rounded-xl border border-secondary/10">
+                        <p class="font-semibold flex items-start">
+                            <i class="fas fa-info-circle text-secondary mr-2 mt-1"></i>
+                            <span>¿Tu municipio no aparece? Contáctanos para verificar cobertura en tu zona.</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 bg-background">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">Soluciones Publicitarias <span
+                        class="text-secondary">Efectivas</span></h2>
+                <p class="text-lg text-gray-600">Paquetes diseñados para maximizar el alcance de tu negocio en
+                    Chalatenango</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Paquete Básico -->
+                <div class="service-card bg-white rounded-2xl shadow-card p-8 animate-fade-in">
+                    <div class="text-center mb-8">
+                        <div
+                            class="inline-flex items-center justify-center w-16 h-16 bg-secondary/10 text-secondary rounded-full mb-6">
+                            <i class="fas fa-star text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-primary mb-2">Paquete Inicial</h3>
+                        <p class="text-4xl font-bold text-primary mb-1">$20<span
+                                class="text-lg font-normal text-gray-500">/semana</span></p>
+                        <p class="text-gray-500">Ideal para emprendimientos</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>1 post por semana en redes sociales</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>Diseño gráfico profesional</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>Alcance en Facebook e Instagram</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-gray-300 mt-1 mr-3"></i>
+                            <span class="text-gray-400">Contenido en video</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-gray-300 mt-1 mr-3"></i>
+                            <span class="text-gray-400">Menciones en TV</span>
+                        </li>
+                    </ul>
+                    <a href="#contact"
+                        class="block w-full bg-light hover:bg-secondary hover:text-white text-center text-primary font-bold py-3 rounded-lg transition-colors">
+                        Seleccionar
+                    </a>
+                </div>
+
+                <!-- Paquete Intermedio (Popular) -->
+                <div
+                    class="service-card bg-white rounded-2xl shadow-card p-8 animate-fade-in delay-200 relative overflow-visible popular">
+                    <div class="text-center mb-8">
+                        <div
+                            class="inline-flex items-center justify-center w-16 h-16 bg-secondary text-white rounded-full mb-6">
+                            <i class="fas fa-rocket text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-primary mb-2">Paquete Impulso</h3>
+                        <p class="text-4xl font-bold text-primary mb-1">$50<span
+                                class="text-lg font-normal text-gray-500">/semana</span></p>
+                        <p class="text-gray-500">Recomendado para negocios</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>3 posts por semana en redes</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>1 reel semanal</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>Alcance en Facebook, Instagram y TikTok</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>2 menciones semanales en TV</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times-circle text-gray-300 mt-1 mr-3"></i>
+                            <span class="text-gray-400">Transmisiones en vivo</span>
+                        </li>
+                    </ul>
+                    <a href="#contact"
+                        class="block w-full bg-secondary hover:bg-primary text-white text-center font-bold py-3 rounded-lg transition-colors shadow-secondary/20 hover:shadow-secondary/30">
+                        Seleccionar
+                    </a>
+                </div>
+
+                <!-- Paquete Premium -->
+                <div class="service-card bg-white rounded-2xl shadow-card p-8 animate-fade-in">
+                    <div class="text-center mb-8">
+                        <div
+                            class="inline-flex items-center justify-center w-16 h-16 bg-secondary/10 text-secondary rounded-full mb-6">
+                            <i class="fas fa-crown text-xl"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold text-primary mb-2">Paquete Premium</h3>
+                        <p class="text-4xl font-bold text-primary mb-1">$75<span
+                                class="text-lg font-normal text-gray-500">/semana</span></p>
+                        <p class="text-gray-500">Para marcas establecidas</p>
+                    </div>
+                    <ul class="space-y-4 mb-8">
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>5 posts por semana en redes</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>2 reels y 1 transmisión en vivo</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>Alcance en todas las plataformas</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>Post patrocinado destacado</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check-circle text-secondary mt-1 mr-3"></i>
+                            <span>5 menciones semanales en TV</span>
+                        </li>
+                    </ul>
+                    <a href="#contact"
+                        class="block w-full bg-light hover:bg-secondary hover:text-white text-center text-primary font-bold py-3 rounded-lg transition-colors">
+                        Seleccionar
+                    </a>
+                </div>
+            </div>
+
+            <div class="mt-16 bg-white rounded-2xl p-8 border border-gray-200 shadow-lg">
+                <div class="flex flex-col md:flex-row items-center gap-8">
+                    <div class="md:w-1/3 text-center">
+                        <div
+                            class="inline-flex items-center justify-center w-20 h-20 bg-secondary text-white rounded-full mb-4">
+                            <i class="fas fa-lightbulb text-2xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-primary">¿Necesitas algo personalizado?</h3>
+                    </div>
+                    <div class="md:w/2/3">
+                        <p class="mb-4">Ofrecemos soluciones a medida para tu negocio. Desde campañas especiales hasta
+                            cobertura de eventos, tenemos opciones adaptadas a tus necesidades específicas.</p>
+                        <a href="#contact" class="inline-flex items-center text-primary font-bold group">
+                            <span class="mr-2">Hablemos sobre tu proyecto</span>
+                            <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Catalog Section -->
+    <section id="catalog" class="py-20">
+        <div class="container mx-auto px-4">
+            <div class="catalog-section overflow-hidden">
+                <div class="flex flex-col md:flex-row">
+                    <div class="md:w-1/2 catalog-content p-12 text-white relative">
+                        <div class="relative z-10">
+                            <div class="inline-block bg-secondary/20 text-white font-bold py-1 px-4 rounded-full mb-6">
+                                NUEVO
+                            </div>
+                            <h2 class="text-3xl md:text-4xl font-bold mb-6">Catálogo de Servicios 2023</h2>
+                            <p class="text-xl mb-8 max-w-lg">Descubre todas nuestras opciones publicitarias, paquetes
+                                especiales y promociones exclusivas en nuestro catálogo digital.</p>
+                            <a href="#"
+                                class="inline-flex items-center justify-center bg-secondary hover:bg-white text-white hover:text-primary font-bold py-3 px-8 rounded-lg transition-colors">
+                                <i class="fas fa-download mr-3"></i>
+                                <span>Descargar Catálogo Completo</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="md:w-1/2 bg-light p-12 flex items-center justify-center">
+                        <div
+                            class="bg-gray-200 border-2 border-dashed rounded-xl w-full h-96 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="inline-block bg-primary text-white text-4xl p-6 rounded-full mb-6">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <p class="text-gray-500">Vista previa del catálogo</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-20 bg-white">
+        <div class="container mx-auto px-4">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-primary mb-4">Lo que dicen <span
+                        class="text-secondary">nuestros clientes</span></h2>
+                <p class="text-lg text-gray-600">Historias reales de negocios que crecieron con nuestra ayuda</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Testimonio 1 -->
+                <div class="testimonial-card rounded-2xl shadow-card p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gray-200 border-2 border-dashed rounded-full w-16 h-16 flex-shrink-0"></div>
+                        <div class="ml-4">
+                            <h4 class="font-bold text-lg">Marta Rodríguez</h4>
+                            <p class="text-secondary font-semibold">Tienda de Ropa "Fashion"</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 relative z-10">"Desde que empecé a anunciarme en Canal 29, mi tienda ha
+                        aumentado sus ventas en un 40% en solo tres meses. El equipo es muy profesional y creativo,
+                        siempre encuentran la mejor manera de presentar mis productos."</p>
+                    <div class="flex mt-6">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonio 2 -->
+                <div class="testimonial-card rounded-2xl shadow-card p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gray-200 border-2 border-dashed rounded-full w-16 h-16 flex-shrink-0"></div>
+                        <div class="ml-4">
+                            <h4 class="font-bold text-lg">Carlos Hernández</h4>
+                            <p class="text-secondary font-semibold">Restaurante "El Fogón"</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 relative z-10">"Los paquetes de publicidad son muy accesibles y el alcance
+                        es increíble. Ahora todos en Chalatenango conocen mi restaurante. Las transmisiones en vivo de
+                        nuestros eventos han sido un éxito rotundo."</p>
+                    <div class="flex mt-6">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonio 3 -->
+                <div class="testimonial-card rounded-2xl shadow-card p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gray-200 border-2 border-dashed rounded-full w-16 h-16 flex-shrink-0"></div>
+                        <div class="ml-4">
+                            <h4 class="font-bold text-lg">Luisa Martínez</h4>
+                            <p class="text-secondary font-semibold">Ferretería "El Constructor"</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 relative z-10">"Contraté el paquete premium y los resultados superaron mis
+                        expectativas. La atención al cliente es excelente y muy rápida. Mi negocio ha tenido un
+                        crecimiento del 60% desde que trabajo con Canal 29."</p>
+                    <div class="flex mt-6">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                </div>
+
+                <!-- Testimonio 4 -->
+                <div class="testimonial-card rounded-2xl shadow-card p-8">
+                    <div class="flex items-center mb-6">
+                        <div class="bg-gray-200 border-2 border-dashed rounded-full w-16 h-16 flex-shrink-0"></div>
+                        <div class="ml-4">
+                            <h4 class="font-bold text-lg">Roberto Sánchez</h4>
+                            <p class="text-secondary font-semibold">Supermercado "La Económica"</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 relative z-10">"Llevamos 2 años anunciándonos con Canal 29 y ha sido la
+                        mejor inversión para nuestro negocio. Los posts en redes sociales y las menciones en TV han
+                        aumentado significativamente nuestro reconocimiento en la zona."</p>
+                    <div class="flex mt-6">
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                        <i class="fas fa-star text-yellow-400"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 bg-background">
+        <div class="container mx-auto px-4">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="flex flex-col lg:flex-row">
+                    <div class="lg:w-2/5 bg-primary text-white p-12">
+                        <h2 class="text-3xl font-bold mb-6">¿Listo para <span class="text-secondary">anunciarte?</span>
+                        </h2>
+                        <p class="mb-8 text-white/90">Contáctanos hoy mismo y descubre cómo podemos ayudar a tu negocio
+                            a crecer en Chalatenango.</p>
+
+                        <div class="space-y-6 mb-10">
+                            <div class="flex items-start">
+                                <div class="bg-secondary/20 p-3 rounded-lg mr-4">
+                                    <i class="fab fa-whatsapp text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">WhatsApp</h3>
+                                    <a href="https://wa.me/50379273128" target="_blank"
+                                        class="text-white/90 hover:text-white text-lg">7927-3128</a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="bg-secondary/20 p-3 rounded-lg mr-4">
+                                    <i class="far fa-envelope text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">Email</h3>
+                                    <a href="mailto:canal29omnivision@gmail.com"
+                                        class="text-white/90 hover:text-white text-lg">canal29omnivision@gmail.com</a>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="bg-secondary/20 p-3 rounded-lg mr-4">
+                                    <i class="far fa-clock text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg">Horario</h3>
+                                    <p class="text-white/90">Lunes a Viernes: 8:00 AM - 5:00 PM</p>
+                                    <p class="text-white/90">Sábados: 8:00 AM - 12:00 PM</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="https://wa.me/50379273128" target="_blank"
+                            class="inline-flex items-center justify-center bg-secondary hover:bg-white text-white hover:text-primary font-bold py-3 px-8 rounded-lg w-full text-center group shadow-lg">
+                            <i class="fab fa-whatsapp mr-3 text-xl"></i>
+                            <span>Enviar mensaje por WhatsApp</span>
+                            <i
+                                class="fas fa-arrow-right ml-3 transform group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+
+                    <div class="lg:w-3/5 p-12">
+                        <h3 class="text-2xl font-bold text-primary mb-2">Solicita información</h3>
+                        <p class="text-gray-600 mb-8">Completa el formulario y nos pondremos en contacto contigo a la
+                            brevedad</p>
+
+                        <form class="space-y-6 contact-form">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="name" class="block text-gray-700 mb-2">Nombre completo</label>
+                                    <input type="text" id="name"
+                                        class="w-full px-4 py-3 border rounded-lg focus:outline-none" required>
+                                </div>
+                                <div>
+                                    <label for="business" class="block text-gray-700 mb-2">Negocio o empresa</label>
+                                    <input type="text" id="business"
+                                        class="w-full px-4 py-3 border rounded-lg focus:outline-none" required>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label for="email" class="block text-gray-700 mb-2">Email</label>
+                                    <input type="email" id="email"
+                                        class="w-full px-4 py-3 border rounded-lg focus:outline-none" required>
+                                </div>
+                                <div>
+                                    <label for="phone" class="block text-gray-700 mb-2">Teléfono</label>
+                                    <input type="tel" id="phone"
+                                        class="w-full px-4 py-3 border rounded-lg focus:outline-none">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="service" class="block text-gray-700 mb-2">Servicio de interés</label>
+                                <select id="service" class="w-full px-4 py-3 border rounded-lg focus:outline-none">
+                                    <option value="">Selecciona una opción</option>
+                                    <option value="basic">Paquete Inicial ($20/semana)</option>
+                                    <option value="medium">Paquete Impulso ($50/semana)</option>
+                                    <option value="premium">Paquete Premium ($75/semana)</option>
+                                    <option value="custom">Paquete Personalizado</option>
+                                    <option value="other">Otro servicio</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="message" class="block text-gray-700 mb-2">Mensaje</label>
+                                <textarea id="message" rows="4"
+                                    class="w-full px-4 py-3 border rounded-lg focus:outline-none"
+                                    placeholder="Cuéntanos sobre tu negocio y objetivos..."></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-secondary hover:bg-primary text-white font-bold py-4 rounded-lg transition-colors flex items-center justify-center shadow-lg shadow-secondary/30 hover:shadow-secondary/40">
+                                <span>¡Quiero anunciarme!</span>
+                                <i class="fas fa-arrow-right ml-3"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+                <div class="mb-8 md:mb-0">
+                    <div class="flex items-center">
+                        <div class="logo-number">
+                            29
+                        </div>
+                        <div>
+                            <div class="text-xl font-bold text-white">CANAL 29</div>
+                            <div class="text-sm font-bold text-secondary">OMNIVISIÓN</div>
+                        </div>
+                    </div>
+                    <p class="mt-4 text-white/80 max-w-md">Medio líder en Chalatenango con más de 24 años de
+                        trayectoria, conectando a la comunidad y potenciando negocios locales.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-8">
+                    <div>
+                        <h4 class="font-bold text-lg mb-4">Enlaces rápidos</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#about" class="text-white/80 hover:text-white transition-colors">Quiénes
+                                    somos</a></li>
+                            <li><a href="#services"
+                                    class="text-white/80 hover:text-white transition-colors">Servicios</a></li>
+                            <li><a href="#catalog" class="text-white/80 hover:text-white transition-colors">Catálogo</a>
+                            </li>
+                            <li><a href="#contact" class="text-white/80 hover:text-white transition-colors">Contacto</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-lg mb-4">Síguenos</h4>
+                        <div class="flex space-x-4">
+                            <a href="https://facebook.com/tn29" target="_blank"
+                                class="text-white/80 hover:text-white text-xl">
+                                <i class="fab fa-facebook"></i>
+                            </a>
+                            <a href="https://instagram.com/canal29deportes" target="_blank"
+                                class="text-white/80 hover:text-white text-xl">
+                                <i class="fab fa-instagram"></i>
+                            </a>
+                            <a href="https://tiktok.com/@canal29omnivision" target="_blank"
+                                class="text-white/80 hover:text-white text-xl">
+                                <i class="fab fa-tiktok"></i>
+                            </a>
+                            <a href="https://youtube.com" target="_blank"
+                                class="text-white/80 hover:text-white text-xl">
+                                <i class="fab fa-youtube"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-8 border-t border-white/20 text-center text-white/60">
+                <p>&copy; 2023 Canal 29 Omnivisión. Todos los derechos reservados.</p>
+                <p class="mt-2">Chalatenango, El Salvador</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animaciones al hacer scroll
+        document.addEventListener('DOMContentLoaded', function () {
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate-fade-in');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.animate-fade-in').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Inicializar el mapa Leaflet
+            const map = L.map('map').setView([13.98, -88.93], 10);
+
+            // Capa base - Estilo minimalista
+            const lightLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Otras capas de estilo
+            const grayLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            });
+
+            const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            });
+
+            // Datos de cobertura
+            const coverageData = [
+                {
+                    name: "Chalatenango",
+                    position: [14.033, -88.933],
+                    type: "full",
+                    priority: 1,
+                    details: "Sede principal del canal con cobertura completa las 24 horas",
+                    municipalities: ["Chalatenango", "San Miguel de Mercedes", "Concepción Quezaltepeque",
+                        "Tejutla", "La Reina", "La Palma", "San Ignacio", "Citalá",
+                        "Nueva Concepción", "Agua Caliente"]
+                },
+                {
+                    name: "Santa Ana",
+                    position: [14.15, -89.55],
+                    type: "partial",
+                    priority: 2,
+                    details: "Cobertura en caseríos de Metapán",
+                    municipalities: ["Metapán"]
+                },
+                {
+                    name: "Cuscatlán",
+                    position: [13.85, -89.05],
+                    type: "partial",
+                    priority: 3,
+                    details: "Cobertura en caseríos de Suchitoto",
+                    municipalities: ["Suchitoto"]
+                },
+                {
+                    name: "San Salvador",
+                    position: [13.95, -89.20],
+                    type: "partial",
+                    priority: 4,
+                    details: "Cobertura en Aguilares",
+                    municipalities: ["Aguilares"]
+                },
+                {
+                    name: "La Libertad",
+                    position: [13.98, -89.38],
+                    type: "partial",
+                    priority: 5,
+                    details: "Cobertura en San Pablo Tacachico",
+                    municipalities: ["San Pablo Tacachico"]
+                }
+            ];
+
+            // Añadir marcadores al mapa con colores por prioridad
+            coverageData.forEach(location => {
+                // Crear elemento HTML personalizado para el marcador
+                const markerElement = document.createElement('div');
+                markerElement.className = `priority-marker priority-${location.priority}`;
+
+                // Crear el marcador personalizado
+                const marker = L.marker(location.position, {
+                    icon: L.divIcon({
+                        className: '',
+                        html: markerElement,
+                        iconSize: [30, 30],
+                        iconAnchor: [15, 15]
+                    })
+                }).addTo(map);
+
+                // Contenido del popup
+                const popupContent = `
+                    <div class="p-2">
+                        <h3 class="text-lg font-bold text-primary mb-2">${location.name}</h3>
+                        <p class="mb-3">${location.details}</p>
+                        <div class="font-semibold mb-1">Municipios cubiertos:</div>
+                        <ul class="list-disc pl-5">
+                            ${location.municipalities.map(m => `<li>${m}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+
+                // Añadir popup
+                marker.bindPopup(popupContent, {
+                    autoPan: true,
+                    autoPanPadding: [20, 20]
+                });
+            });
+
+            // Añadir leyenda
+            const legend = L.control({ position: 'bottomright' });
+
+            legend.onAdd = function (map) {
+                const div = L.DomUtil.create('div', 'legend');
+                div.innerHTML = `
+                    <h4 class="font-bold mb-2">Prioridad de Cobertura</h4>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #315281"></div>
+                        <span>Máxima (Chalatenango)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4a6da0"></div>
+                        <span>Alta</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #5d87b8"></div>
+                        <span>Media</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #7fa1d0"></div>
+                        <span>Baja</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #a0c3df"></div>
+                        <span>Mínima</span>
+                    </div>
+                `;
+                return div;
+            };
+
+            legend.addTo(map);
+
+            // Función para cambiar estilos de mapa
+            window.changeMapStyle = function (style) {
+                if (map.hasLayer(lightLayer)) map.removeLayer(lightLayer);
+                if (map.hasLayer(grayLayer)) map.removeLayer(grayLayer);
+                if (map.hasLayer(darkLayer)) map.removeLayer(darkLayer);
+
+                switch (style) {
+                    case 'light':
+                        lightLayer.addTo(map);
+                        break;
+                    case 'gray':
+                        grayLayer.addTo(map);
+                        break;
+                    case 'dark':
+                        darkLayer.addTo(map);
+                        break;
+                }
+            };
+        });
+    </script>
+</body>
+
+</html>
